@@ -13,7 +13,7 @@ ENGINE = InnoDB
 DEFAULT CHARACTER SET = utf8;
 
 CREATE TABLE IF NOT EXISTS `store`.`Client` (
-  `id` INT NOT NULL,
+  `id` INT  NOT NULL AUTO_INCREMENT,
   `name` VARCHAR(45) NULL,
   `id_user` INT NULL,
   `created_date` TIMESTAMP NULL,
