@@ -52,6 +52,20 @@ if [ $HOSTNAME = "orchestrator" ]; then
 
  kubectl taint nodes --all node-role.kubernetes.io/master-
 
+ wget https://get.helm.sh/helm-v2.14.2-linux-amd64.tar.gz
+
+ tar xf helm-v2.14.2-linux-amd64.tar.gz
+
+ mv linux-amd64/helm /usr/local/bin/helm
+
+ helm repo add gitlab https://charts.gitlab.io
+
+# kubectl apply -f /vagrant/elk/fluentd-daemonset.yaml
+# kubectl apply -f /vagrant/elk/fluentd-rbac.yaml
+# kubectl apply -f /vagrant/elk/elasticsearch.yaml
+# kubectl apply -f /vagrant/elk/kibana.yaml
+# kubectl apply -f /vagrant/monitoring/eks-admin-service-account.yaml
+
 fi;
 
 if [ $HOSTNAME = "devops" ]; then
@@ -61,13 +75,13 @@ if [ $HOSTNAME = "devops" ]; then
 
   echo ==== Installing GitLab CE =================================================
   curl -sS https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh | sudo bash
-  sudo apt-get install -y gitlab-ce
-  sudo gitlab-ctl reconfigure
-  sudo gitlab-ctl status
+#  sudo apt-get install -y gitlab-ce
+#  sudo gitlab-ctl reconfigure
+#  sudo gitlab-ctl status
 
   echo ==== Installing GitLab Multi Runner =======================================
   curl -L https://packages.gitlab.com/install/repositories/runner/gitlab-ci-multi-runner/script.deb.sh | sudo bash
-  sudo apt-get install -y gitlab-ci-multi-runner
+#  sudo apt-get install -y gitlab-ci-multi-runner
 
 fi;
 

@@ -1,0 +1,78 @@
+variables:
+  MAVEN_CLI_OPTS: "-s .m2/settings.xml --batch-mode"
+  MAVEN_OPTS: "-Dmaven.repo.local=.m2/repository"
+
+image:
+  name: maven:3.3.9-jdk-8
+  entrypoint: ["/bin/sh", "-c"]
+
+cache:
+  policy: pull
+  key: "$CI_COMMIT_SHA"
+  paths:
+    - .m2/repository/
+    - target/*
+    
+stages:
+  - maven-build
+  - create-image
+  - deploy
+
+build1:
+  image: maven:3-jdk-8
+  stage: maven-build
+  artifacts:
+    name: "$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    when: always
+    paths:
+      - ./target/
+  cache:
+    policy: push
+    key: $CI_COMMIT_SHA
+  script:
+    - "mvn clean package -DskipTests"
+
+build2:
+  stage: create-image
+  cache:
+    policy: pull
+    key: $CI_COMMIT_SHA
+  image:
+    name: docker:latest
+    entrypoint: ["/bin/sh", "-c"]
+  variables:
+    DOCKER_HOST: tcp://localhost:2375
+  services:
+    - name: docker:dind
+      entrypoint: ["dockerd-entrypoint.sh"]
+  before_script:
+    - docker login --username USER_DOCKER_HUB -p ${DOCKER_PASS}
+  script:
+    - docker build -t USER_DOCKER_HUB/eureka-server:${CI_COMMIT_SHORT_SHA} .
+    - docker push USER_DOCEKR_HUB/eureka-server:${CI_COMMIT_SHORT_SHA}
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - unknown_failure
+
+deploy_srv_dev: &deploy
+  image: lachlanevenson/k8s-kubectl:latest
+  stage: deploy
+  environment:
+    name: eureka-server
+    url: http://192.168.66.30:30001/eureka
+  script:
+    - sed -i "s/__VERSION_PROJECT__/${CI_COMMIT_SHORT_SHA}/" kubernetes_deploy.yml
+    - kubectl apply -f kubernetes_deploy.yml
+    - echo "Deploy realizado!"
+  retry:
+    max: 2
+    when:
+      - runner_system_failure
+      - stuck_or_timeout_failure
+      - unknown_failure
+  only:
+    - master
+

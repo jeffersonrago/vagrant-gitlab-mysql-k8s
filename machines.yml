@@ -1,20 +1,20 @@
 - name: devops
   cpus: 1
-  memory: 2048
+  memory: 3096
   hostname: devops
   ip: 192.168.66.10
   sistema: ubuntu/xenial64
 
 - name: orchestrator
   cpus: 1
-  memory: 3096
+  memory: 3072
   hostname: orchestrator
   ip: 192.168.66.20
   sistema: ubuntu/xenial64
 
 - name: mysql
   cpus: 1
-  memory: 1024
+  memory: 512
   hostname: mysql
   ip: 192.168.66.30
   sistema: ubuntu/xenial64
